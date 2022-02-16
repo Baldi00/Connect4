@@ -31,7 +31,7 @@ public class Minimax {
             children = new ArrayList<>();
             value = null;
             level = 0;
-            isMax = true;
+            isMax = false;
             move = null;
         }
         
@@ -63,10 +63,6 @@ public class Minimax {
             Coin nextCoin = actual.isMax ? Coin.RED : Coin.YELLOW;
             for(int i=0; i<7; i++){
                 Node temp = new Node(actual.grid, nextCoin, i, actual);
-//                if(temp.grid!=null){
-//                    temp.grid.printGrid();
-//                    System.out.println(temp.grid.hasSomeoneWon());
-//                }
                 if(temp.grid != null && temp.level < maxLevel){
                     if(temp.grid.hasSomeoneWon()){
                         calculateAndAssignNodeValue(temp);
@@ -86,8 +82,9 @@ public class Minimax {
             }
         }
         for(Node c : initialNode.children){
-            if(c.value.equals(initialNode.value))
+            if(c.value.equals(initialNode.value)){
                 return c.move;
+            }
         }
         return 0;
     }

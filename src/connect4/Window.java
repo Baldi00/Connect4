@@ -7,14 +7,18 @@ package connect4;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 
 /**
  *
@@ -40,7 +44,9 @@ public class Window extends JFrame{
     }
     
     private MyJPanel [][] cells;
-    private JButton easy, medium, hard, pvp, reset;
+    private JSlider difficultySlider;
+    private JLabel easy, hard;
+    private JButton pve, pvp, reset;
     private JPanel primaryPanel, tablePanel, buttonsPanel;
     private JButton [] moveButtons;
     
@@ -63,22 +69,20 @@ public class Window extends JFrame{
         moveButtons = new JButton[7];
         primaryPanel = new JPanel(new BorderLayout());
         tablePanel = new JPanel(new GridLayout(7,7));
-        buttonsPanel = new JPanel(new GridLayout(1,5));
-        easy = new JButton("Easy CPU");
-        medium = new JButton("Medium CPU");
-        hard = new JButton("Hard CPU");
+        buttonsPanel = new JPanel(new GridLayout(1,6));
+        pve = new JButton("CPU");
         pvp = new JButton("PVP");
+        easy = new JLabel("Easy");
+        hard = new JLabel("Hard");
         reset = new JButton("Reset");
+        difficultySlider = new JSlider(1,7,5);
         
-        for(int i=0; i<6; i++){
-            for(int j=0; j<7; j++){
-                cells[i][j] = new MyJPanel();
-                tablePanel.add(cells[i][j]);
-            }
-        }
+        easy.setHorizontalAlignment(SwingConstants.CENTER);
+        hard.setHorizontalAlignment(SwingConstants.CENTER);
         
         for(int i=0; i<7; i++){
-            moveButtons[i] = new JButton("^");
+            moveButtons[i] = new JButton("V");
+            moveButtons[i].setFont(new Font(moveButtons[i].getFont().getFamily(),Font.PLAIN,18));
             moveButtons[i].setName(""+i);
             moveButtons[i].setEnabled(false);
             moveButtons[i].addActionListener((ActionEvent ae) -> {
@@ -92,8 +96,14 @@ public class Window extends JFrame{
                                 setMoveButtons(false);
                                 JOptionPane.showMessageDialog(null, "Player Won");
                             }else{
+                                setMoveButtons(false);
+                                reset.setEnabled(false);
+                                reset.paintImmediately(0,0,100,100);
                                 hasWon = grid.insertAndCheck(Coin.YELLOW, minimax.executeAlgorithm(grid, AISearchDepth));
                                 displayGrid();
+                                setMoveButtons(true);
+                                reset.setEnabled(true);
+                                reset.paintImmediately(0,0,100,100);
                                 if(hasWon){
                                     setMoveButtons(false);
                                     JOptionPane.showMessageDialog(null, "CPU Won");
@@ -122,31 +132,27 @@ public class Window extends JFrame{
             tablePanel.add(moveButtons[i]);
         }
         
+        for(int i=0; i<6; i++){
+            for(int j=0; j<7; j++){
+                cells[i][j] = new MyJPanel();
+                tablePanel.add(cells[i][j]);
+            }
+        }
+        
         reset.setEnabled(false);
         
         buttonsPanel.add(easy);
-        buttonsPanel.add(medium);
+        buttonsPanel.add(difficultySlider);
         buttonsPanel.add(hard);
+        buttonsPanel.add(pve);
         buttonsPanel.add(pvp);
         buttonsPanel.add(reset);
         
         primaryPanel.add(buttonsPanel, BorderLayout.NORTH);
         primaryPanel.add(tablePanel, BorderLayout.CENTER);
         
-        easy.addActionListener((ActionEvent ae) -> {
-            AISearchDepth = 3;
-            againstAI = true;
-            switchButtons();
-        });
-        
-        medium.addActionListener((ActionEvent ae) -> {
-            AISearchDepth = 5;
-            againstAI = true;
-            switchButtons();
-        });
-        
-        hard.addActionListener((ActionEvent ae) -> {
-            AISearchDepth = 7;
+        pve.addActionListener((ActionEvent ae) -> {
+            AISearchDepth = difficultySlider.getValue();
             againstAI = true;
             switchButtons();
         });
@@ -182,9 +188,8 @@ public class Window extends JFrame{
     
     private void switchButtons(){
         setMoveButtons(!moveButtons[0].isEnabled());
-        easy.setEnabled(!easy.isEnabled());
-        medium.setEnabled(!medium.isEnabled());
-        hard.setEnabled(!hard.isEnabled());
+        difficultySlider.setEnabled(!difficultySlider.isEnabled());
+        pve.setEnabled(!pve.isEnabled());
         pvp.setEnabled(!pvp.isEnabled());
         reset.setEnabled(!reset.isEnabled());
     }
@@ -192,6 +197,7 @@ public class Window extends JFrame{
     private void setMoveButtons(boolean b){
         for(int i=0; i<7; i++){
             moveButtons[i].setEnabled(b);
+            moveButtons[i].paintImmediately(0, 0, 100, 100);
         }
     }
     
@@ -209,6 +215,7 @@ public class Window extends JFrame{
                         cells[5-i][j].setColor(Color.white);
                         break;
                 }
+                cells[5-i][j].paintImmediately(0, 0, 100, 100);
             }
         }
     }
