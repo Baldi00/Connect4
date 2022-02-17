@@ -31,7 +31,7 @@ public class Minimax {
             children = new ArrayList<>();
             value = null;
             level = 0;
-            isMax = false;
+            isMax = true;
             move = null;
         }
         
@@ -45,7 +45,7 @@ public class Minimax {
                 father.children.add(this);
                 value = null;
                 level = father.level+1;
-                isMax = c.equals(Coin.YELLOW);
+                isMax = c.equals(Coin.RED);
                 move = col;
             } catch(ColumnFullException e) {
                 this.grid = null;
@@ -60,19 +60,19 @@ public class Minimax {
         
         while(!deque.isEmpty()){
             Node actual = deque.poll();
-            Coin nextCoin = actual.isMax ? Coin.RED : Coin.YELLOW;
+            Coin nextCoin = actual.isMax ? Coin.YELLOW : Coin.RED;
             for(int i=0; i<7; i++){
                 Node temp = new Node(actual.grid, nextCoin, i, actual);
                 if(temp.grid != null && temp.level < maxLevel){
                     if(temp.grid.hasSomeoneWon()){
                         calculateAndAssignNodeValue(temp);
-                        calculateValuesForEachNodeFrom(temp);
+                        if(calculateValuesForEachNodeFrom(temp)) break;
                     }else{
                         deque.add(temp);
                     }
                 }else if(temp.level == maxLevel){
                     calculateAndAssignNodeValue(temp);
-                    calculateValuesForEachNodeFrom(temp);
+                    if(calculateValuesForEachNodeFrom(temp)) break;
                 }else if(temp.grid == null){
                     if(temp.father.children.isEmpty()){
                         calculateAndAssignNodeValue(temp.father);
@@ -81,15 +81,18 @@ public class Minimax {
                 }
             }
         }
+        
         for(Node c : initialNode.children){
             if(c.value.equals(initialNode.value)){
-                return c.move;
+                int result = c.move;
+                cleanRecursive(initialNode);
+                return result;
             }
         }
         return 0;
     }
     
-    private void calculateValuesForEachNodeFrom(Node n){
+    private boolean calculateValuesForEachNodeFrom(Node n){
         //Set values of nodes and fathers
         Node tempFather = n.father;
         while(tempFather != null && tempFather.value == null){
@@ -117,6 +120,13 @@ public class Minimax {
             }
             tempFather = tempFather.father;
         }
+        
+        //Search for pruning
+        tempFather = n.father;
+        if(tempFather!=null && tempFather.father!=null)
+            return (!tempFather.isMax && tempFather.father.isMax && tempFather.value <= tempFather.father.value) || 
+                    (tempFather.isMax && !tempFather.father.isMax && tempFather.value >= tempFather.father.value);
+        return false;
     }
     
     private void calculateAndAssignNodeValue(Node n){
@@ -130,7 +140,7 @@ public class Minimax {
     private int evaluationFunction(Grid g){
         int maxValue = evaluateForSingleAgent(g, Coin.YELLOW);
         int minValue = evaluateForSingleAgent(g, Coin.RED);
-        return minValue - maxValue;
+        return maxValue - minValue;
     }
     
     private int evaluateForSingleAgent(Grid g, Coin c){
@@ -212,5 +222,15 @@ public class Minimax {
     
     private int utilityFunction(boolean isMax){
         return isMax ? -100 : 100;
+    }
+    
+    private void cleanRecursive(Node n){
+        if(n.children.isEmpty()){
+            n.father = null;
+        }else{
+            for(Node n2 : n.children)
+                cleanRecursive(n2);
+            n.children.clear();
+        }
     }
 }

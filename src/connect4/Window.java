@@ -11,13 +11,14 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 
 /**
@@ -44,8 +45,8 @@ public class Window extends JFrame{
     }
     
     private MyJPanel [][] cells;
-    private JSlider difficultySlider;
-    private JLabel easy, hard;
+    private JSpinner difficultySpinner;
+    private JLabel difficultyLabel;
     private JButton pve, pvp, reset;
     private JPanel primaryPanel, tablePanel, buttonsPanel;
     private JButton [] moveButtons;
@@ -69,16 +70,14 @@ public class Window extends JFrame{
         moveButtons = new JButton[7];
         primaryPanel = new JPanel(new BorderLayout());
         tablePanel = new JPanel(new GridLayout(7,7));
-        buttonsPanel = new JPanel(new GridLayout(1,6));
+        buttonsPanel = new JPanel(new GridLayout(1,5));
         pve = new JButton("CPU");
         pvp = new JButton("PVP");
-        easy = new JLabel("Easy");
-        hard = new JLabel("Hard");
+        difficultyLabel = new JLabel("Difficulty");
         reset = new JButton("Reset");
-        difficultySlider = new JSlider(1,7,5);
-        
-        easy.setHorizontalAlignment(SwingConstants.CENTER);
-        hard.setHorizontalAlignment(SwingConstants.CENTER);
+        difficultySpinner = new JSpinner(new SpinnerNumberModel(5, 1, 8, 1));
+        difficultyLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ((JSpinner.DefaultEditor)difficultySpinner.getEditor()).getTextField().setHorizontalAlignment(JTextField.LEFT);
         
         for(int i=0; i<7; i++){
             moveButtons[i] = new JButton("V");
@@ -103,7 +102,7 @@ public class Window extends JFrame{
                                 displayGrid();
                                 setMoveButtons(true);
                                 reset.setEnabled(true);
-                                reset.paintImmediately(0,0,100,100);
+                                reset.paintImmediately(0,0,200,200);
                                 if(hasWon){
                                     setMoveButtons(false);
                                     JOptionPane.showMessageDialog(null, "CPU Won");
@@ -141,9 +140,8 @@ public class Window extends JFrame{
         
         reset.setEnabled(false);
         
-        buttonsPanel.add(easy);
-        buttonsPanel.add(difficultySlider);
-        buttonsPanel.add(hard);
+        buttonsPanel.add(difficultyLabel);
+        buttonsPanel.add(difficultySpinner);
         buttonsPanel.add(pve);
         buttonsPanel.add(pvp);
         buttonsPanel.add(reset);
@@ -152,7 +150,7 @@ public class Window extends JFrame{
         primaryPanel.add(tablePanel, BorderLayout.CENTER);
         
         pve.addActionListener((ActionEvent ae) -> {
-            AISearchDepth = difficultySlider.getValue();
+            AISearchDepth = (Integer)difficultySpinner.getValue();
             againstAI = true;
             switchButtons();
         });
@@ -180,7 +178,7 @@ public class Window extends JFrame{
         add(primaryPanel);
         setSize(550, 600);
         setTitle("Connect4");
-//        setResizable(false);
+        setResizable(false);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
@@ -188,7 +186,7 @@ public class Window extends JFrame{
     
     private void switchButtons(){
         setMoveButtons(!moveButtons[0].isEnabled());
-        difficultySlider.setEnabled(!difficultySlider.isEnabled());
+        difficultySpinner.setEnabled(!difficultySpinner.isEnabled());
         pve.setEnabled(!pve.isEnabled());
         pvp.setEnabled(!pvp.isEnabled());
         reset.setEnabled(!reset.isEnabled());

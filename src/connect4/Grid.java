@@ -223,4 +223,13 @@ public class Grid {
     public Coin getCoinAt(int x, int y){
         return grid[x][y];
     }
+    
+    public int numberOfPossibleMoves(){
+        int count = 0;
+        for(int i=0; i<7; i++){
+            if(getCoinAt(5, i).equals(Coin.VOID))
+                count++;
+        }
+        return count;
+    }
 }
